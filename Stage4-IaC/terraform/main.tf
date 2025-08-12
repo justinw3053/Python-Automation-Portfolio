@@ -11,7 +11,7 @@ provider "aws" {
 resource "aws_ecr_repository" "my_flask_app_repo" {
 	# This property sets the name of the ECR repository in AWS
 	# The name should match the name we will use to tag the Docker image
-	name = "my-flask=app"
+	name = "my-flask-app"
 
 	# The 'force_delete' property allows Terraform to delete the repository even if it
 	# contains images. We set this to true for easy cleanup during developement

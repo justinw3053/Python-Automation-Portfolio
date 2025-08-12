@@ -2,3 +2,4 @@
 # The 'Flask' package is the web framework we are using
 # The '==2.0.2' specifies a specific version of Flask to ensure our code works as expected
 Flask==2.0.2
+Werkzeug==2.0.2

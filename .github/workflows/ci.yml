@@ -1,50 +1,82 @@
-name: Build and Push Docker Image
+# This is the name of our workflow, which will appear in the GitHub Actions tab.
+name: Build, Terraform, and Push
 
+# This specifies when the workflow should run.
+# 'push' means it will run every time a commit is pushed to the 'main' branch.
 on:
   push:
     branches:
       - main
-      
-jobs: # This declare the start of the jobs section
-  build-and-push:
-    runs-on: ubuntu-latest # This specifies the runing environment for this job
-    steps: # This keyword starts the list of steps for this job
-      - name: Checkout repository code # A descriptive name for yur step
-        uses: actions/checkout@v4 # This specifies which action to use
 
-      - name: Configure AWS credentials # Securely pull saved AWS credentials from GitHub 
-        uses: aws-actions/configure-aws-credentials@v4 # Changed from outdated v1 to latest v4
+# This defines a single job, which is a set of steps to be executed.
+jobs:
+  build-and-push:
+    # This specifies the operating system the job will run on.
+    runs-on: ubuntu-latest
+    
+    # This is a list of all the commands and actions the job will perform.
+    steps:
+      # Step 1: Check out the repository code.
+      # This action checks out your code from the repository so the workflow can access it.
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      # Step 2: Configure AWS credentials.
+      # This action uses your stored GitHub secrets to set up temporary AWS credentials
+      # on the runner, allowing subsequent commands to interact with your AWS account.
+      # We are using v4 of this action, which is the latest and most secure version.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
+      # Step 3: Setup Terraform.
+      # This is a NEW step to install the Terraform CLI on the runner.
+      # The GitHub runner does not have Terraform pre-installed, so we must add this step.
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          # We specify the exact version of Terraform to use for consistency.
+          terraform_version: 1.5.7
+
+      # Step 4: Terraform Init.
+      # We run 'terraform init' to download the AWS provider and initialize the
+      # working directory.
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        # We specify the subdirectory where our Terraform files are located.
+        working-directory: ./terraform
+
+      # Step 5: Terraform Apply.
+      # We run 'terraform apply' to create or update the infrastructure defined in our code.
+      # '-auto-approve' is a flag that bypasses the confirmation prompt, which is necessary
+      # for automated workflows. We use this for a development environment.
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+
+      # Step 6: Docker login.
+      # This action logs in to our Amazon ECR repository using the AWS credentials
+      # that were configured in the first step.
       - name: Login to Amazon ECR
-        uses: docker/login-action@v3 # Changed from outdated v2 to updated v3
+        uses: docker/login-action@v3
         with:
           registry: 043309349280.dkr.ecr.eu-central-1.amazonaws.com
-# Removed with change to v3
-#          registry: ${{ env.ECR_REGISTRY }}
-#          username: ${{ env.ECR_USERNAME }}
-#          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # Using the secret as the password
 
-      - name: Build and tag the Docker image # A new step
-        run: docker build -t my-app:latest ./Stage3-AWS/docker_uploader # This is the command to run
+      # Step 7: Build and tag the Docker image.
+      # This command builds the Docker image from our Dockerfile.
+      # We specify the `flask_app` directory because that is where the Dockerfile is located.
+      - name: Build and tag the Docker image
+        run: docker build -t my-flask-app .
+        working-directory: ./flask_app
 
-#      The below caused an authentication error, but was my fault within GitHub, still failed
-#      - name: Push the image to ECR
-#        run: docker push ${{ env.ECR_REGISTRY}}/my-app:latest
-
-# This also did not work, possibly due to using pipes
-#      - name: Log into ECR and push the image
-#        env:
-#          ECR_REGISTRY: 043309349280.dkr.ecr.eu-central-1.amazonaws.com
-#        run: |
-#          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-#          docker tag my-app:latest ${{ env.ECR_REGISTRY }}/my-app:latest
-#          docker push ${{ env.ECR_REGISTRY }}/my-app:latest
-
+      # Step 8: Push the image to ECR.
+      # This step first tags the local image with the full ECR URI, then pushes it.
       - name: Push the image to ECR
         run: |
-          docker tag my-app:latest 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-app:latest # THis had to be added since it wasn't tagged locally
-          docker push 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-app:latest        
+          docker tag my-flask-app:latest 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-flask-app:latest
+          docker push 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-flask-app:latest
