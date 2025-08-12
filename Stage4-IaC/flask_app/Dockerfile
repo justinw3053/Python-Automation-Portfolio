@@ -20,4 +20,4 @@ COPY . .
 
 # This is the command that runs when the container is started
 # It tells the container to execute the `app.py` file with the Python interpreter
-CMD["pyton", "app.py"]
+CMD["python", "app.py"]
