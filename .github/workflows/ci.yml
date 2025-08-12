@@ -45,4 +45,6 @@ jobs: # This declare the start of the jobs section
 #          docker push ${{ env.ECR_REGISTRY }}/my-app:latest
 
       - name: Push the image to ECR
-        run: docker push 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-app:latest        
+        run: |
+          docker tag my-app: latest 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-app:latest
+          docker push 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-app:latest        
