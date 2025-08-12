@@ -23,8 +23,9 @@ jobs: # This declare the start of the jobs section
         uses: docker/login-action@v3 # Changed from outdated v2 to updated v3
         with:
           registry: ${{ env.ECR_REGISTRY }}
-          username: ${{ env.ECR_USERNAME }}
-          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # Using the secret as the password
+# Removed with change to v3
+#          username: ${{ env.ECR_USERNAME }}
+#          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # Using the secret as the password
 
       - name: Build and tag the Docker image # A new step
         run: docker build -t my-app:latest . # This is the command to run
