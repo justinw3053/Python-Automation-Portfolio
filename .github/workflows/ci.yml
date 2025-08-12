@@ -13,14 +13,14 @@ jobs: # This declare the start of the jobs section
         uses: actions/checkout@v4 # This specifies which action to use
 
       - name: Configure AWS credentials # Securely pull saved AWS credentials from GitHub 
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4 # Changed from outdated v1 to latest v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
 
       - name: Login to Amazon ECR
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3 # Changed from outdated v2 to updated v3
         with:
           registry: ${{ env.ECR_REGISTRY }}
           username: ${{ env.ECR_USERNAME }}
@@ -30,14 +30,17 @@ jobs: # This declare the start of the jobs section
         run: docker build -t my-app:latest . # This is the command to run
 
 #      The below caused an authentication error, but was my fault within GitHub, still failed
-      - name: Push the image to ECR
-        run: docker push ${{ env.ECR_REGISTRY}}/my-app:latest
+#      - name: Push the image to ECR
+#        run: docker push ${{ env.ECR_REGISTRY}}/my-app:latest
 
-      - name: Log into ECR and push the image
-        env:
-          ECR_REGISTRY: 043309349280.dkr.ecr.eu-central-1.amazonaws.com
-        run: |
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-          docker tag my-app:latest ${{ env.ECR_REGISTRY }}/my-app:latest
-          docker push ${{ env.ECR_REGISTRY }}/my-app:latest
-        
+# This also did not work, possibly due to using pipes
+#      - name: Log into ECR and push the image
+#        env:
+#          ECR_REGISTRY: 043309349280.dkr.ecr.eu-central-1.amazonaws.com
+#        run: |
+#          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+#          docker tag my-app:latest ${{ env.ECR_REGISTRY }}/my-app:latest
+#          docker push ${{ env.ECR_REGISTRY }}/my-app:latest
+
+      - name: Push the image to ECR
+        run: docker push 043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-app:latest        
