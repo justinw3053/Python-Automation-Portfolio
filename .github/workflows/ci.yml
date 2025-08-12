@@ -29,15 +29,15 @@ jobs: # This declare the start of the jobs section
       - name: Build and tag the Docker image # A new step
         run: docker build -t my-app:latest . # This is the command to run
 
-#      The below caused an authentication error
-#      - name: Push the image to ECR
-#        run: docker push ${{ env.ECR_REGISTRY}}/my-app:latest
+#      The below caused an authentication error, but was my fault within GitHub
+      - name: Push the image to ECR
+        run: docker push ${{ env.ECR_REGISTRY}}/my-app:latest
 
-      - name: Log into ECR and push the image
-        env:
-          ECR_REGISTRY: 043309349280.dkr.ecr.eu-central-1.amazonaws.com
-        run: |
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-          docker tag my-app:latest ${{ env.ECR_REGISTRY }}/my-app:latest
-          docker push ${{ env.ECR_REGISTRY }}/my-app:latest
+#      - name: Log into ECR and push the image
+#        env:
+#          ECR_REGISTRY: 043309349280.dkr.ecr.eu-central-1.amazonaws.com
+#        run: |
+#          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+#          docker tag my-app:latest ${{ env.ECR_REGISTRY }}/my-app:latest
+#          docker push ${{ env.ECR_REGISTRY }}/my-app:latest
         
