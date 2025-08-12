@@ -1,0 +1,14 @@
+# Ignore the entire .terraform directory.
+# This directory contains temporary data and downloaded provider binaries.
+.terraform/
+
+# Ignore the lock file, which ensures consistent versions.
+# It is best practice to commit this file to ensure that all developers
+# are using the same provider versions, but in a small team/single user project,
+# we can safely ignore it to avoid merge conflicts and large file issues.
+.terraform.lock.hcl
+
+# Ignore Python specific files and directories
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
