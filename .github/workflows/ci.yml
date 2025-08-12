@@ -29,7 +29,7 @@ jobs: # This declare the start of the jobs section
 #          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # Using the secret as the password
 
       - name: Build and tag the Docker image # A new step
-        run: docker build -t my-app:latest . # This is the command to run
+        run: docker build -t my-app:latest /home/justin/Python/Stage3-AWS/docker_uploader # This is the command to run
 
 #      The below caused an authentication error, but was my fault within GitHub, still failed
 #      - name: Push the image to ECR
