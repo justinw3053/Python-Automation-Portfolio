@@ -5,3 +5,32 @@ on:
     branches:
       - main
       
+name: build-and-push
+
+jobs: # This declare the start of the jobs section
+  build-and-push:
+    runs-on: ubuntu-latest # This specifies the runing environment for this job
+    steps: # This keyword starts the list of steps for this job
+      - name: Checkout repository code # A descriptive name for yur step
+        uses: actions/checkout@v4 # This specifies which action to use
+
+      - name: Configure AWS credentials # Securely pull saved AWS credentials from GitHub 
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.ECR_REGISTRY }}
+          username: ${{ env.ECR_USERNAME }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # Using the secret as the password
+
+      - name: Build and tag the Docker image # A new step
+        run: docker build -t my-app:latest # This is the command to run
+
+      - name: Push the image to ECR
+        run: docker push ${{ env.ECR_REGISTRY}}/my-app:latest
+        
