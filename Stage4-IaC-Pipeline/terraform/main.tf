@@ -3,16 +3,30 @@ provider "aws" {
   region = "eu-central-1" # Or your specified AWS region
 }
 
-# --- RE-ADDED: ECR Repository for our Docker image ---
+# --- CRITICAL: Terraform S3 Backend Configuration ---
+# This configures Terraform to store its state file remotely in an S3 bucket.
+# This is crucial for CI/CD pipelines and collaborative environments,
+# ensuring state is persistent and accessible from multiple locations.
+terraform {
+  backend "s3" {
+    bucket         = "justinw3053-terraform-state-bucket" # <<< IMPORTANT: REPLACE with YOUR unique S3 bucket name
+    key            = "my-flask-app/terraform.tfstate" # Path to the state file within the bucket
+    region         = "eu-central-1"                 # Same region as your bucket
+    dynamodb_table = "my-flask-app-terraform-locks" # <<< IMPORTANT: REPLACE with YOUR unique DynamoDB table name
+    encrypt        = true                           # Encrypt the state file at rest
+  }
+}
+
+# --- ECR Repository for our Docker image ---
 # This resource creates the Elastic Container Registry (ECR) repository
 # where our Docker image will be stored.
 resource "aws_ecr_repository" "my_flask_app_repo" {
-  name         = "my-flask-app"
+  name = "my-flask-app"
   # force_delete = true # Consider removing this in production to prevent accidental deletion
 }
 
 
-# --- NEW: VPC for our ECS cluster ---
+# --- VPC for our ECS cluster ---
 # This creates a Virtual Private Cloud (VPC), which acts as a virtual network
 # isolated from other AWS networks. All our resources will reside within this VPC.
 resource "aws_vpc" "my_flask_app_vpc" {
@@ -22,7 +36,7 @@ resource "aws_vpc" "my_flask_app_vpc" {
   }
 }
 
-# --- NEW: Subnets within the VPC ---
+# --- Subnets within the VPC ---
 # We create two public subnets in different Availability Zones (AZs) for high availability.
 # ECS tasks will be deployed into these subnets.
 resource "aws_subnet" "my_flask_app_subnet_1" {
@@ -45,7 +59,7 @@ resource "aws_subnet" "my_flask_app_subnet_2" {
   }
 }
 
-# --- NEW: Internet Gateway for public internet access ---
+# --- Internet Gateway for public internet access ---
 # An Internet Gateway is attached to the VPC to enable communication between
 # instances in the VPC and the internet.
 resource "aws_internet_gateway" "my_flask_app_igw" {
@@ -55,7 +69,7 @@ resource "aws_internet_gateway" "my_flask_app_igw" {
   }
 }
 
-# --- NEW: Route Table and Route to Internet Gateway ---
+# --- Route Table and Route to Internet Gateway ---
 # This route table defines how network traffic is routed within the VPC.
 # We add a default route (0.0.0.0/0) to the Internet Gateway, allowing outbound traffic.
 resource "aws_route_table" "my_flask_app_route_table" {
@@ -69,7 +83,7 @@ resource "aws_route_table" "my_flask_app_route_table" {
   }
 }
 
-# --- NEW: Associate Route Table with Subnets ---
+# --- Associate Route Table with Subnets ---
 # We associate our public subnets with the route table to ensure they can access the internet.
 resource "aws_route_table_association" "my_flask_app_rta_subnet_1" {
   subnet_id      = aws_subnet.my_flask_app_subnet_1.id
@@ -82,7 +96,7 @@ resource "aws_route_table_association" "my_flask_app_rta_subnet_2" {
 }
 
 
-# --- NEW: Security Group for ECS Tasks ---
+# --- Security Group for ECS Tasks ---
 # This security group acts as a virtual firewall, controlling inbound and outbound traffic
 # to the ECS tasks. We allow inbound traffic on port 5000 (our Flask app's port) from anywhere.
 resource "aws_security_group" "my_flask_app_sg" {
@@ -171,7 +185,6 @@ resource "aws_ecs_service" "my_flask_app_service" {
   desired_count   = 1
   launch_type     = "FARGATE"
 
-  # --- NEW: Network configuration for Fargate ---
   # This block specifies the subnets and security groups for the ECS tasks.
   network_configuration {
     subnets         = [aws_subnet.my_flask_app_subnet_1.id, aws_subnet.my_flask_app_subnet_2.id]
