@@ -1,12 +1,20 @@
 # This is the name of our workflow, which will appear in the GitHub Actions tab.
 name: Build, Terraform, and Push
 
-# This specifies when the workflow should run.
-# 'push' means it will run every time a commit is pushed to the 'main' branch.
+# --- UPDATED TRIGGER: Manual Workflow Dispatch ---
+# This configuration allows you to manually trigger this workflow
+# directly from the 'Actions' tab in your GitHub repository.
+# This is useful for controlling when deployments happen, saving costs
+# and preventing unwanted deployments on every commit.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    # You can add inputs here if you want to pass parameters when manually triggering
+    # For example, to specify an environment or a Docker tag.
+    # inputs:
+    #   environment:
+    #     description: 'Deployment environment (e.g., dev, prod)'
+    #     required: true
+    #     default: 'dev'
 
 # This defines a single job, which is a set of steps to be executed.
 jobs:
