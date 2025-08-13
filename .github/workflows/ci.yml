@@ -49,7 +49,7 @@ jobs:
       # The WORKING DIRECTORY is now corrected.
       - name: Terraform Apply
         id: apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var="ecr_image_uri=043309349280.dkr.ecr.eu-central-1.amazonaws.com/my-flask-app:latest"
         working-directory: './Stage4-IaC-Pipeline/terraform'
 
       # Step 6: Docker login.
