@@ -3,6 +3,15 @@ provider "aws" {
   region = "eu-central-1" # Or your specified AWS region
 }
 
+# --- RE-ADDED: ECR Repository for our Docker image ---
+# This resource creates the Elastic Container Registry (ECR) repository
+# where our Docker image will be stored.
+resource "aws_ecr_repository" "my_flask_app_repo" {
+  name         = "my-flask-app"
+  # force_delete = true # Consider removing this in production to prevent accidental deletion
+}
+
+
 # --- NEW: VPC for our ECS cluster ---
 # This creates a Virtual Private Cloud (VPC), which acts as a virtual network
 # isolated from other AWS networks. All our resources will reside within this VPC.
