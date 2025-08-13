@@ -43,14 +43,14 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
-        working-directory: './Stage4-IaC/terraform/Infrastructure as Code with Terraform'
+        working-directory: './Stage4-IaC-Pipeline/terraform'
 
       # Step 5: Terraform Apply.
       # The WORKING DIRECTORY is now corrected.
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve
-        working-directory: './Stage4-IaC/terraform/Infrastructure as Code with Terraform'
+        working-directory: './Stage4-IaC-Pipeline/terraform'
 
       # Step 6: Docker login.
       # This action logs in to our Amazon ECR repository.
@@ -63,7 +63,7 @@ jobs:
       # The WORKING DIRECTORY is now corrected to point to the flask_app subdirectory.
       - name: Build and tag the Docker image
         run: docker build -t my-flask-app .
-        working-directory: './Stage4-IaC/flask_app'
+        working-directory: './Stage4-IaC-Pipeline/flask_app'
 
       # Step 8: Push the image to ECR.
       # This step first tags the local image with the full ECR URI, then pushes it.
