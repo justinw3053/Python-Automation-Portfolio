@@ -22,7 +22,7 @@ terraform {
 # where our Docker image will be stored.
 resource "aws_ecr_repository" "my_flask_app_repo" {
   name = "my-flask-app"
-  # force_delete = true # Consider removing this in production to prevent accidental deletion
+  force_delete = true # Consider removing this in production to prevent accidental deletion
 }
 
 

@@ -11,7 +11,7 @@ def lambda_handler(event, context):
 
     Args:
         event (dict):
-            Thsi dictionary contains all the data about the invocation.
+            This dictionary contains all the data about the invocation.
             When triggered by API Gateway, it includes details about the
             incoming HTTP request, such as headers, query parameters,
             HTTP method, and the request body.
@@ -41,7 +41,7 @@ def lambda_handler(event, context):
     Returns:
         dict:
             A dictionary that AWS Lambda especially when integrated with API Gateway)
-            expects as an HTTP response. For API Gatewaay Proxy Integration (which we'll use),
+            expects as an HTTP response. For API Gateway Proxy Integration (which we'll use),
             this dictionary *must* include:
             - 'statusCode': The HTTP status code (e.g., 200 for success, 400 for bad request).
             - 'headers': A dictionary of HTTP response headers (e.g., Content-Type, CORS headers).
@@ -50,8 +50,8 @@ def lambda_handler(event, context):
     """
 
     # Print the entire incoming event to CloudWatch Logs for debugging.
-    # This is very helpful to see exactly what data your Lambda recieves.
-    print(f"Recieved event: {json.dumps(event, indent=2)}")
+    # This is very helpful to see exactly what data your Lambda receives.
+    print(f"Received event: {json.dumps(event, indent=2)}")
 
     # Initialize a default value for the 'name'.
     name = "World"
@@ -68,8 +68,8 @@ def lambda_handler(event, context):
     # Define the content of the response body as a Python dictionary.
     # We include a greeting message and echo back the full input event for demonstration.
     response_body_content = {
-        "message": f"Hellow form Lambda, {name}!",
-        "input_event_recieved": event # Showing what the Lambda recieved
+        "message": f"Hello from Lambda, {name}!",
+        "input_event_received": event # Showing what the Lambda received
     }
 
     # Construct the final HTTP response dictionary in the format expected bt API Gateway

@@ -1,0 +1,45 @@
+# This is the name of our workflow, which will appear in the GitHub Actions tab.
+name: Deploy Serverless Lambda
+
+# This configures the workflow to be triggered manually from the GitHub Actions UI.
+# This gives you full control over when the deployment runs.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-lambda:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository code
+        # Checks out your repository code so the workflow can access it.
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        # Sets up AWS credentials for the GitHub Actions runner.
+        # These secrets must be configured in your GitHub repository settings.
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1 # Ensure this matches your Terraform region
+
+      - name: Setup Terraform
+        # Installs a specific version of Terraform on the runner.
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init (Stage 5)
+        id: init_lambda
+        # Initializes Terraform in the Lambda project's directory.
+        # This will connect to the S3 backend and download necessary plugins.
+        run: terraform init
+        working-directory: './Stage5-Serverless-Lambda/terraform'
+
+      - name: Terraform Apply (Stage 5)
+        id: apply_lambda
+        # Applies the Terraform configuration to deploy the Lambda function and API Gateway.
+        # -auto-approve flag skips manual confirmation.
+        run: terraform apply -auto-approve
+        working-directory: './Stage5-Serverless-Lambda/terraform'
